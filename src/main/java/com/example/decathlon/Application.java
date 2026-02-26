@@ -9,8 +9,7 @@ public class Application {
     //hejsan alla
 
 
-
-    //HEJEHEJHEHSKKALAKDSLJDLSJ
+// Lilian Skriver kommentar 22:16
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
