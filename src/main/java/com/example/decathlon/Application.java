@@ -11,5 +11,3 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 }
-
-//Test Lovisa
