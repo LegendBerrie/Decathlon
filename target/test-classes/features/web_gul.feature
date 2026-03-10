@@ -1,5 +1,5 @@
 Feature: Web GUI basic functionality
 
-  Scenario: Open Decathlon application
-    Given I open Decathlon Web application
-    Then the page shuld display "Decathlon Web MVP"
+  Scenario: Open Decathlon Web GUI
+    Given I open Decathlon Web GUI
+    Then the page should display "Decathlon Web MVP"
