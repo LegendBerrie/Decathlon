@@ -11,9 +11,11 @@ import java.util.*;
 @RestController
 @RequestMapping("/com/example/decathlon/api")
 public class ApiController {
+    //hej
     private final CompetitionService comp;
 
     public ApiController(CompetitionService comp) { this.comp = comp; }
+//Testar skriva
 
     @PostMapping("/competitors")
     public ResponseEntity<?> add(@RequestBody Map<String,String> body) {
