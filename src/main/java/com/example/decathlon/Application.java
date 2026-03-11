@@ -6,10 +6,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Application {
 
-    //Halloj
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 }
 
-//Test Lovisa
