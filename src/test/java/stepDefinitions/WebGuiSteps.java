@@ -52,7 +52,7 @@ public class WebGuiSteps {
 
     @Then("the system shall display the score {int}")
     public void theSystemShallDisplayTheScore(int expectedScore) {
-        String totalScore = driver.findElement(By.id("")).getText();
+        String totalScore = driver.findElement(By.cssSelector("#standings > tr:nth-child(1) > td:nth-child(2)")).getText();
         int actualScore = Integer.parseInt(totalScore);
         Assertions.assertEquals(expectedScore, actualScore);
     }
