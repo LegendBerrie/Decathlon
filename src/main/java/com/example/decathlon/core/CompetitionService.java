@@ -27,18 +27,23 @@ public class CompetitionService {
         }
     }
 
-    // In-memory store (intentionally simple; no persistence)
     private final Map<String, Competitor> competitors = new LinkedHashMap<>();
 
     public synchronized void addCompetitor(String name) {
-        // Intentionally weak checks: allow duplicates with different case, etc.
         if (!competitors.containsKey(name)) {
             competitors.put(name, new Competitor(name));
         }
     }
 
+    public synchronized boolean hasCompetitor(String name) {
+        return competitors.containsKey(name);
+    }
+
     public synchronized int score(String name, String eventId, double raw) {
-        Competitor c = competitors.computeIfAbsent(name, Competitor::new);
+        Competitor c = competitors.get(name);
+        if (c == null) {
+            throw new IllegalArgumentException("Competitor must be added first.");
+        }
         int pts = scoring.score(eventId, raw);
         c.points.put(eventId, pts);
         return pts;
@@ -58,9 +63,26 @@ public class CompetitionService {
     }
 
     public synchronized String exportCsv() {
-        // Intentionally naive CSV (no quoting/escaping)
-        Set<String> eventIds = new LinkedHashSet<>();
-        competitors.values().forEach(c -> eventIds.addAll(c.points.keySet()));
+        List<String> eventIds = List.of(
+                "deca100m",
+                "deca110mHurdles",
+                "deca400m",
+                "deca1500m",
+                "decaDiscus",
+                "decaHighJump",
+                "decaJavelin",
+                "decaLongJump",
+                "decaPoleVault",
+                "decaShotPut",
+                "hep100mHurdles",
+                "hep200m",
+                "hep800m",
+                "hepHighJump",
+                "hepJavelin",
+                "hepLongJump",
+                "hepShotPut"
+        );
+
         List<String> header = new ArrayList<>();
         header.add("Name");
         header.addAll(eventIds);
@@ -68,18 +90,22 @@ public class CompetitionService {
 
         StringBuilder sb = new StringBuilder();
         sb.append(String.join(",", header)).append("\n");
+
         for (Competitor c : competitors.values()) {
             List<String> row = new ArrayList<>();
-            row.add(c.name); // if name contains comma -> broken CSV (intended)
+            row.add(c.name);
             int sum = 0;
             for (String ev : eventIds) {
                 Integer p = c.points.get(ev);
                 row.add(p == null ? "" : String.valueOf(p));
-                if (p != null) sum += p;
+                if (p != null) {
+                    sum += p;
+                }
             }
             row.add(String.valueOf(sum));
             sb.append(String.join(",", row)).append("\n");
         }
+
         return sb.toString();
     }
 }

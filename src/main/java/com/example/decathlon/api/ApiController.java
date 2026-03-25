@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -21,11 +23,10 @@ public class ApiController {
     }
 
     @PostMapping("/competitors")
-    public ResponseEntity<?> add(@RequestBody Map<String,String> body) {
-
+    public ResponseEntity<?> add(@RequestBody Map<String, String> body) {
         String name = Optional.ofNullable(body.get("name")).orElse("").trim();
 
-        if(name.isEmpty()){
+        if (name.isEmpty()) {
             return ResponseEntity.badRequest().body("You must fill in all required fields.");
         }
 
@@ -34,33 +35,31 @@ public class ApiController {
     }
 
     @PostMapping("/score")
-    public ResponseEntity<?> score(@RequestBody ScoreReq r){
-
-        if(r.name()==null || r.name().isBlank() || r.event()==null || r.event().isBlank()){
+    public ResponseEntity<?> score(@RequestBody ScoreReq r) {
+        if (r.name() == null || r.name().isBlank() || r.event() == null || r.event().isBlank()) {
             return ResponseEntity.badRequest().body("You must fill in all required fields.");
         }
 
-        int pts = comp.score(r.name(), r.event(), r.raw());
+        if (!comp.hasCompetitor(r.name().trim())) {
+            return ResponseEntity.badRequest().body("Competitor must be added first.");
+        }
 
+        int pts = comp.score(r.name().trim(), r.event(), r.raw());
         return ResponseEntity.ok(Map.of("points", pts));
     }
 
     @GetMapping("/standings")
-    public List<Map<String,Object>> standings(){
+    public List<Map<String, Object>> standings() {
         return comp.standings();
     }
 
-    @GetMapping(value="/export.csv", produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> export(){
-
+    @GetMapping(value = "/export.csv", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> export() {
         String csv = comp.exportCsv();
-
-        String timestamp = LocalDateTime.now()
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
 
         return ResponseEntity.ok()
-                .header("Content-Disposition","attachment; filename=results_"+timestamp+".csv")
+                .header("Content-Disposition", "attachment; filename=results_" + timestamp + ".csv")
                 .body(csv);
     }
-
 }

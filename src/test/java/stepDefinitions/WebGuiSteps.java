@@ -1,9 +1,11 @@
 package stepDefinitions;
 
+import io.cucumber.java.After;
 import io.cucumber.java.en.*;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.support.ui.Select;
@@ -11,6 +13,11 @@ import org.openqa.selenium.support.ui.Select;
 public class WebGuiSteps {
 
     WebDriver driver;
+
+    @After
+    public void teardown() {
+        if (driver != null) driver.quit();
+    }
 
     @Given("I open Decathlon Web GUI")
     public void openApplication() {
@@ -28,7 +35,7 @@ public class WebGuiSteps {
 
         if (!actualText.equals(expectedText)) {
             throw new AssertionError(
-                    "Expected text: " + expectedText + " but fount: " + actualText);
+                    "Expected text: " + expectedText + " but found: " + actualText);
 
 
         }
@@ -42,7 +49,12 @@ public class WebGuiSteps {
     @And("I choose the event {string}")
     public void iChooseTheEvent(String event) {
         Select eventDropDown = new Select(driver.findElement(By.id("event")));
-        eventDropDown.selectByVisibleText(event);
+        for (WebElement option : eventDropDown.getOptions()) {
+            if (option.getText().contains(event)) {
+                option.click();
+                break;
+            }
+        }
     }
 
     @And("I enter the result {double}")
@@ -52,7 +64,7 @@ public class WebGuiSteps {
 
     @Then("the system shall display the score {int}")
     public void theSystemShallDisplayTheScore(int expectedScore) {
-        String totalScore = driver.findElement(By.cssSelector("#standings > tr:nth-child(1) > td:nth-child(2)")).getText();
+        String totalScore = driver.findElement(By.cssSelector("#msg")).getText();
         int actualScore = Integer.parseInt(totalScore);
         Assertions.assertEquals(expectedScore, actualScore);
     }
