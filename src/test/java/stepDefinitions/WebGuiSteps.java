@@ -28,7 +28,6 @@ public class WebGuiSteps {
         driver.get("http://localhost:8080");
     }
 
-
     @Then("the page should display {string}")
     public void thePageShouldDisplay(String expectedText) {
         String actualText = driver.findElement(By.tagName("h1")).getText();
