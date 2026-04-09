@@ -5,23 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Decathlon Web MVP</title>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 1800px; margin: 2rem auto; padding: 0 1rem; }
+        body { font-family: system-ui, sans-serif; max-width: 1400px; margin: 2rem auto; padding: 0 1rem; }
         .row { display: flex; gap: .5rem; align-items: center; margin-bottom: .5rem; flex-wrap: wrap; }
         .card { border: 1px solid #ddd; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
         th, td { border-bottom: 1px solid #eee; padding: .5rem; text-align: left; white-space: nowrap; }
         #error { color: #b00020; }
         .table-wrap { overflow-x: auto; }
+        .mode-group { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
-<h1>Decathlon Web MVP</h1>
+<h1>Track and Field Web MVP</h1>
+
+<div class="card">
+    <div class="mode-group">
+        <label><input type="radio" name="mode" value="deca" checked> Decathlon</label>
+        <label><input type="radio" name="mode" value="hep"> Heptathlon</label>
+    </div>
+</div>
 
 <div class="card">
     <h2>Add competitor</h2>
     <div class="row">
         <label for="name">Name</label>
-        <input id="name" data-testid="competitorNameInput" placeholder="e.g., Anna" />
+        <input id="name" data-testid="competitorNameInput" placeholder="e.g., Anna Andersson" />
         <button id="add" data-testid="addCompetitorBtn">Add competitor</button>
     </div>
     <div id="error" data-testid="errorBanner" aria-live="polite"></div>
@@ -33,25 +41,7 @@
         <label for="name2">Name</label>
         <input id="name2" placeholder="same as above" />
         <label for="event">Event</label>
-        <select id="event" data-testid="eventSelect">
-            <option value="deca100m">Decathlon 100m (s)</option>
-            <option value="deca110mHurdles">Decathlon 110m hurdles (s)</option>
-            <option value="deca400m">Decathlon 400m (s)</option>
-            <option value="deca1500m">Decathlon 1500m (s)</option>
-            <option value="decaDiscus">Decathlon Discus (m)</option>
-            <option value="decaHighJump">Decathlon High jump (cm)</option>
-            <option value="decaJavelin">Decathlon Javelin (m)</option>
-            <option value="decaLongJump">Decathlon Long jump (cm)</option>
-            <option value="decaPoleVault">Decathlon Pole vault (cm)</option>
-            <option value="decaShotPut">Decathlon Shot put (m)</option>
-            <option value="hep100mHurdles">Heptathlon 100m hurdles (s)</option>
-            <option value="hep200m">Heptathlon 200m (s)</option>
-            <option value="hep800m">Heptathlon 800m (s)</option>
-            <option value="hepHighJump">Heptathlon High jump (cm)</option>
-            <option value="hepJavelin">Heptathlon Javelin (m)</option>
-            <option value="hepLongJump">Heptathlon Long jump (cm)</option>
-            <option value="hepShotPut">Heptathlon Shot put (m)</option>
-        </select>
+        <select id="event" data-testid="eventSelect"></select>
         <label for="raw">Result</label>
         <input id="raw" data-testid="rawInput" type="number" step="0.01" />
         <button id="save" data-testid="saveScoreBtn">Calculate score</button>
@@ -64,27 +54,7 @@
     <div class="table-wrap">
         <table>
             <thead>
-            <tr>
-                <th>Name</th>
-                <th>Deca 100m</th>
-                <th>Deca 110m hurdles</th>
-                <th>Deca 400m</th>
-                <th>Deca 1500m</th>
-                <th>Deca Discus</th>
-                <th>Deca High jump</th>
-                <th>Deca Javelin</th>
-                <th>Deca Long jump</th>
-                <th>Deca Pole vault</th>
-                <th>Deca Shot put</th>
-                <th>Hep 100m hurdles</th>
-                <th>Hep 200m</th>
-                <th>Hep 800m</th>
-                <th>Hep High jump</th>
-                <th>Hep Javelin</th>
-                <th>Hep Long jump</th>
-                <th>Hep Shot put</th>
-                <th>Total</th>
-            </tr>
+            <tr id="standingsHead"></tr>
             </thead>
             <tbody id="standings" data-testid="standingsTable"></tbody>
         </table>

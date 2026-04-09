@@ -15,10 +15,10 @@ public class ScoringService {
             Map.entry("deca110mHurdles", new EventDef("deca110mHurdles", Type.TRACK, 5.74352, 28.5, 1.92, "s")),
             Map.entry("deca400m", new EventDef("deca400m", Type.TRACK, 1.53775, 82.0, 1.81, "s")),
             Map.entry("deca1500m", new EventDef("deca1500m", Type.TRACK, 0.03768, 480.0, 1.85, "s")),
-            Map.entry("decaDiscus", new EventDef("decaDiscus", Type.FIELD, 12.91, 4.0, 1.1, "m")),
+            Map.entry("decaDiscus", new EventDef("decaDiscus", Type.FIELD, 12.91, 4.0, 1.10, "m")),
             Map.entry("decaHighJump", new EventDef("decaHighJump", Type.FIELD, 0.8465, 75.0, 1.42, "cm")),
             Map.entry("decaJavelin", new EventDef("decaJavelin", Type.FIELD, 10.14, 7.0, 1.08, "m")),
-            Map.entry("decaLongJump", new EventDef("decaLongJump", Type.FIELD, 0.14354, 220.0, 1.4, "cm")),
+            Map.entry("decaLongJump", new EventDef("decaLongJump", Type.FIELD, 0.14354, 220.0, 1.40, "cm")),
             Map.entry("decaPoleVault", new EventDef("decaPoleVault", Type.FIELD, 0.2797, 100.0, 1.35, "cm")),
             Map.entry("decaShotPut", new EventDef("decaShotPut", Type.FIELD, 51.39, 1.5, 1.05, "m")),
 

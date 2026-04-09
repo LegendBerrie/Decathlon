@@ -2,54 +2,95 @@ const el = (id) => document.getElementById(id)
 const err = el('error')
 const msg = el('msg')
 
-const limits = {
-    deca100m: { min: 5, max: 20 },
-    deca110mHurdles: { min: 10, max: 30 },
-    deca400m: { min: 20, max: 100 },
-    deca1500m: { min: 150, max: 400 },
-    decaDiscus: { min: 0, max: 85 },
-    decaHighJump: { min: 0, max: 300 },
-    decaJavelin: { min: 0, max: 110 },
-    decaLongJump: { min: 0, max: 1000 },
-    decaPoleVault: { min: 0, max: 1000 },
-    decaShotPut: { min: 0, max: 30 },
+const eventConfig = {
+    deca: [
+        { id: 'deca100m', label: '100m (s)', min: 5, max: 20, step: '0.01' },
+        { id: 'deca110mHurdles', label: '110m hurdles (s)', min: 10, max: 30, step: '0.01' },
+        { id: 'deca400m', label: '400m (s)', min: 20, max: 100, step: '0.01' },
+        { id: 'deca1500m', label: '1500m (s)', min: 150, max: 400, step: '0.01' },
+        { id: 'decaDiscus', label: 'Discus (m)', min: 0, max: 85, step: '0.01' },
+        { id: 'decaHighJump', label: 'High jump (cm)', min: 0, max: 300, step: '0.01' },
+        { id: 'decaJavelin', label: 'Javelin (m)', min: 0, max: 110, step: '0.01' },
+        { id: 'decaLongJump', label: 'Long jump (cm)', min: 0, max: 1000, step: '1', integerOnly: true },
+        { id: 'decaPoleVault', label: 'Pole vault (cm)', min: 0, max: 1000, step: '0.01' },
+        { id: 'decaShotPut', label: 'Shot put (m)', min: 0, max: 30, step: '0.01' }
+    ],
+    hep: [
+        { id: 'hep100mHurdles', label: '100m hurdles (s)', min: 10, max: 30, step: '0.01' },
+        { id: 'hep200m', label: '200m (s)', min: 20, max: 100, step: '0.01' },
+        { id: 'hep800m', label: '800m (s)', min: 70, max: 250, step: '0.01' },
+        { id: 'hepHighJump', label: 'High jump (cm)', min: 0, max: 300, step: '0.01' },
+        { id: 'hepJavelin', label: 'Javelin (m)', min: 0, max: 110, step: '0.01' },
+        { id: 'hepLongJump', label: 'Long jump (cm)', min: 0, max: 1000, step: '1', integerOnly: true },
+        { id: 'hepShotPut', label: 'Shot put (m)', min: 0, max: 30, step: '0.01' }
+    ]
+}
 
-    hep100mHurdles: { min: 10, max: 30 },
-    hep200m: { min: 20, max: 100 },
-    hep800m: { min: 70, max: 250 },
-    hepHighJump: { min: 0, max: 300 },
-    hepJavelin: { min: 0, max: 110 },
-    hepLongJump: { min: 0, max: 1000 },
-    hepShotPut: { min: 0, max: 30 }
+function currentMode() {
+    return document.querySelector('input[name="mode"]:checked').value
 }
 
 function setError(t) {
     err.textContent = t
-    msg.textContent = ""
+    msg.textContent = ''
 }
 
 function setMsg(t) {
     msg.textContent = t
-    err.textContent = ""
+    err.textContent = ''
+}
+
+function validateCompetitorName(name) {
+    if (!name) {
+        return 'You must fill in all required fields.'
+    }
+    if (name.length > 50) {
+        return 'Competitor name must be 50 characters or fewer.'
+    }
+    if (!/^[\p{L} ]+$/u.test(name)) {
+        return 'Competitor name may only contain letters and spaces. Example: Anna Andersson.'
+    }
+    return ''
+}
+
+function buildEventOptions() {
+    const mode = currentMode()
+    const select = el('event')
+    select.innerHTML = eventConfig[mode]
+        .map(e => `<option value="${e.id}">${escapeHtml(e.label)}</option>`)
+        .join('')
+    updateRawInputStep()
 }
 
 function updateRawInputStep() {
-    const event = el('event').value
-    if (event === 'decaLongJump' || event === 'hepLongJump') {
-        el('raw').step = '1'
-    } else {
-        el('raw').step = '0.01'
-    }
+    const mode = currentMode()
+    const eventId = el('event').value
+    const config = eventConfig[mode].find(e => e.id === eventId)
+    el('raw').step = config ? config.step : '0.01'
 }
 
+function buildStandingsHead() {
+    const mode = currentMode()
+    const headers = ['Position', 'Name', ...eventConfig[mode].map(e => e.label), 'Total']
+    el('standingsHead').innerHTML = headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')
+}
+
+document.querySelectorAll('input[name="mode"]').forEach(radio => {
+    radio.addEventListener('change', async () => {
+        buildEventOptions()
+        buildStandingsHead()
+        await renderStandings()
+    })
+})
+
 el('event').addEventListener('change', updateRawInputStep)
-updateRawInputStep()
 
 el('add').addEventListener('click', async () => {
     const name = el('name').value.trim()
+    const nameError = validateCompetitorName(name)
 
-    if (!name) {
-        setError('You must fill in all required fields.')
+    if (nameError) {
+        setError(nameError)
         return
     }
 
@@ -77,33 +118,39 @@ el('save').addEventListener('click', async () => {
     const name = el('name2').value.trim()
     const event = el('event').value
     const rawValue = el('raw').value
+    const mode = currentMode()
+
+    const nameError = validateCompetitorName(name)
+    if (nameError && name !== '') {
+        setError(nameError)
+        return
+    }
 
     if (!name || !event || rawValue === '') {
         setError('You must fill in all required fields.')
         return
     }
 
+    if (!/^-?\d+(\.\d+)?$/.test(rawValue.trim())) {
+        setError('Result must be a number. Example: 12.34 or 250.')
+        return
+    }
+
     const raw = Number(rawValue)
+    const config = eventConfig[mode].find(e => e.id === event)
 
-    if (Number.isNaN(raw)) {
-        setError('You must fill in all required fields.')
+    if (config?.integerOnly && !Number.isInteger(raw)) {
+        setError('Long jump must be entered in centimeters as a whole number. Example: 523.')
         return
     }
 
-    if ((event === 'decaLongJump' || event === 'hepLongJump') && !Number.isInteger(raw)) {
-        setError('Long jump must be entered in centimeters.')
+    if (config && raw < config.min) {
+        setError(`Too low. Valid range for ${config.label} is ${config.min} to ${config.max}.`)
         return
     }
 
-    const limit = limits[event]
-
-    if (limit && raw < limit.min) {
-        setError('Too low')
-        return
-    }
-
-    if (limit && raw > limit.max) {
-        setError('Too high')
+    if (config && raw > config.max) {
+        setError(`Too high. Valid range for ${config.label} is ${config.min} to ${config.max}.`)
         return
     }
 
@@ -153,29 +200,16 @@ async function renderStandings() {
     try {
         const res = await fetch('/api/standings')
         const data = await res.json()
+        const mode = currentMode()
+        const activeEvents = eventConfig[mode]
 
         const rows = data
             .sort((a, b) => (b.total || 0) - (a.total || 0))
-            .map(r => `
+            .map((r, index) => `
 <tr>
+    <td>${index + 1}</td>
     <td>${escapeHtml(r.name)}</td>
-    <td>${r.scores?.["deca100m"] ?? ''}</td>
-    <td>${r.scores?.["deca110mHurdles"] ?? ''}</td>
-    <td>${r.scores?.["deca400m"] ?? ''}</td>
-    <td>${r.scores?.["deca1500m"] ?? ''}</td>
-    <td>${r.scores?.["decaDiscus"] ?? ''}</td>
-    <td>${r.scores?.["decaHighJump"] ?? ''}</td>
-    <td>${r.scores?.["decaJavelin"] ?? ''}</td>
-    <td>${r.scores?.["decaLongJump"] ?? ''}</td>
-    <td>${r.scores?.["decaPoleVault"] ?? ''}</td>
-    <td>${r.scores?.["decaShotPut"] ?? ''}</td>
-    <td>${r.scores?.["hep100mHurdles"] ?? ''}</td>
-    <td>${r.scores?.["hep200m"] ?? ''}</td>
-    <td>${r.scores?.["hep800m"] ?? ''}</td>
-    <td>${r.scores?.["hepHighJump"] ?? ''}</td>
-    <td>${r.scores?.["hepJavelin"] ?? ''}</td>
-    <td>${r.scores?.["hepLongJump"] ?? ''}</td>
-    <td>${r.scores?.["hepShotPut"] ?? ''}</td>
+    ${activeEvents.map(e => `<td>${r.scores?.[e.id] ?? ''}</td>`).join('')}
     <td>${r.total ?? 0}</td>
 </tr>
 `).join('')
@@ -190,4 +224,6 @@ function escapeHtml(s) {
     return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
 }
 
+buildEventOptions()
+buildStandingsHead()
 renderStandings()

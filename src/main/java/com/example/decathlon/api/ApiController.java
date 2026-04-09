@@ -30,6 +30,14 @@ public class ApiController {
             return ResponseEntity.badRequest().body("You must fill in all required fields.");
         }
 
+        if (name.length() > 50) {
+            return ResponseEntity.badRequest().body("Competitor name must be 50 characters or fewer.");
+        }
+
+        if (!name.matches("[\\p{L} ]+")) {
+            return ResponseEntity.badRequest().body("Competitor name may only contain letters and spaces.");
+        }
+
         comp.addCompetitor(name);
         return ResponseEntity.status(201).build();
     }
